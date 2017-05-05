@@ -164,6 +164,7 @@ static void on_sigint(int unused) {
 int main(int argc, const char *argv[]) {
     int nl_sock;
     int rc = EXIT_SUCCESS;
+    int rxbuf = 32 * 1024;
 
     signal(SIGINT, &on_sigint);
     siginterrupt(SIGINT, true);
@@ -172,6 +173,12 @@ int main(int argc, const char *argv[]) {
     if (nl_sock == -1) {
         exit(EXIT_FAILURE);
     }
+    
+    rc = setsockopt(nl_sock, SOL_SOCKET, SO_RCVBUF,
+                    &rxbuf, sizeof(rxbuf));
+    if (rc < 0)
+        exit(EXIT_FAILURE);
+    
     rc = set_proc_ev_listen(nl_sock, true);
     if (rc == -1) {
         rc = EXIT_FAILURE;
